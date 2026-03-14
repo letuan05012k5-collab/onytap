@@ -1,98 +1,144 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from "react";
+import {
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from "react-native";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+export default function App() {
 
-export default function HomeScreen() {
+  const [phone, setPhone] = useState("");
+  const [error, setError] = useState("");
+
+  const formatPhone = (text: string) => {
+
+    let cleaned = text.replace(/\D/g, "");
+
+    if (cleaned.length > 10) {
+      cleaned = cleaned.slice(0, 10);
+    }
+
+    let formatted = cleaned;
+
+    if (cleaned.length > 4 && cleaned.length <= 7) {
+      formatted = cleaned.slice(0,4) + " " + cleaned.slice(4);
+    }
+    else if (cleaned.length > 7) {
+      formatted =
+        cleaned.slice(0,4) +
+        " " +
+        cleaned.slice(4,7) +
+        " " +
+        cleaned.slice(7,10);
+    }
+
+    return formatted;
+  };
+
+  const validatePhone = (number: string) => {
+    const cleaned = number.replace(/\s/g,"");
+    const regex = /^[0-9]{10}$/;
+    return regex.test(cleaned);
+  };
+
+  const handleChange = (text: string) => {
+
+    const formatted = formatPhone(text);
+    setPhone(formatted);
+
+    if (formatted.length > 0 && !validatePhone(formatted)) {
+      setError("Số điện thoại không đúng định dạng");
+    } else {
+      setError("");
+    }
+  };
+
+  const handleContinue = () => {
+
+    if (!validatePhone(phone)) {
+      Alert.alert("Lỗi", "Số điện thoại không đúng định dạng");
+      return;
+    }
+
+    Alert.alert("Thành công", "Số điện thoại hợp lệ");
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <View style={styles.container}>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <Text style={styles.title}>Đăng nhập</Text>
+
+      <Text style={styles.label}>Nhập số điện thoại</Text>
+
+      <TextInput
+        style={styles.input}
+        placeholder="Nhập số điện thoại của bạn"
+        keyboardType="numeric"
+        value={phone}
+        onChangeText={handleChange}
+      />
+
+      {error !== "" && (
+        <Text style={styles.error}>{error}</Text>
+      )}
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleContinue}
+      >
+        <Text style={styles.buttonText}>Tiếp tục</Text>
+      </TouchableOpacity>
+
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+
+  container:{
+    flex:1,
+    padding:20,
+    justifyContent:"center"
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+
+  title:{
+    fontSize:24,
+    fontWeight:"bold",
+    marginBottom:30
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+
+  label:{
+    fontSize:16,
+    marginBottom:10
   },
+
+  input:{
+    borderWidth:1,
+    borderColor:"#ccc",
+    padding:12,
+    borderRadius:6
+  },
+
+  error:{
+    color:"red",
+    marginTop:5
+  },
+
+  button:{
+    backgroundColor:"blue",
+    marginTop:20,
+    padding:15,
+    borderRadius:6,
+    alignItems:"center"
+  },
+
+  buttonText:{
+    color:"white",
+    fontSize:16,
+    fontWeight:"bold"
+  }
+
 });
